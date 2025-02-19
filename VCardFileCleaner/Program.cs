@@ -38,21 +38,27 @@ partial class Program
             DoExit();
             return;
         }
+
+        //Combine records
         records = CombineRecords(records);
 
+        //Remove duplicates.
         var comparer = new VCardRecordComparer();
         var distinctRecords = records.Distinct(comparer).ToList();
-        // Ask from Console if user wants to save the records as a CSV file
+
+        // Ask if the user wants to save the combined/distinct records as a VCF file
         Console.WriteLine("Do you want to save the records as a VCard file? (y/n)");
         var answerVCF = Console.ReadLine();
         if (answerVCF?.Equals("y", StringComparison.OrdinalIgnoreCase) == true)
         {
-            var newPath = Path.Combine(Path.GetDirectoryName(path) ?? string.Empty,
+            var vcfPath = Path.Combine(Path.GetDirectoryName(path) ?? string.Empty,
                 $"{Path.GetFileNameWithoutExtension(path)}___CLEANED.vcf");
-            File.WriteAllLines(newPath, GetVCFLines(distinctRecords));
-            Console.WriteLine($"Saved {distinctRecords.Count} records to {newPath}");
+
+            File.WriteAllLines(vcfPath, GetVCFLines(distinctRecords));
+            Console.WriteLine($"Saved {distinctRecords.Count} records to {vcfPath}");
         }
-        // Ask from Console if user wants to save the records as a CSV file
+
+        // Ask if the user wants to save the combined/distinct records as a CSV file
         Console.WriteLine("Do you want to save the records as a CSV file? (y/n)");
         var answerCSV = Console.ReadLine();
         if (answerVCF?.Equals("y", StringComparison.OrdinalIgnoreCase) == true)
@@ -63,6 +69,8 @@ partial class Program
             Task.Run(() => SaveCSVFileAsync(distinctRecords, csvPath));
             Console.WriteLine($"CSV file saved to {csvPath}");
         }
+
+        //Bye now.
         DoExit();
     }
 
@@ -71,10 +79,10 @@ partial class Program
         Console.WriteLine("Press <ENTER> to exit...:)");
         Console.ReadLine();
     }
+
     private static List<VCardRecord> CombineRecords(List<VCardRecord> records)
     {
-        var result = records.Where(r =>
-            !string.IsNullOrEmpty(r.FullName) && !string.IsNullOrEmpty(r.Tel))
+        var result = records.Where(r => !string.IsNullOrEmpty(r.FullName) && !string.IsNullOrEmpty(r.Tel))
             .GroupBy(r => r.FullName)
             .Select(g =>
             {
@@ -88,14 +96,32 @@ partial class Program
                 // If found, store its Tel in Tel2
                 if (second != null)
                 {
+                    if (string.IsNullOrWhiteSpace(main.Tel2))
+                    {
+                        main.Tel2 = second.Tel;
+                    }
+                    else if (string.IsNullOrWhiteSpace(main.Tel3))
+                    {
+                        main.Tel3 = second.Tel;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Due to max numbers, skipped {second.Tel} for {main.FullName}.");
+                    }
+
                     // Find a third record with a different Tel (if any)
                     var third = g.Skip(2).FirstOrDefault(r =>
                         !string.IsNullOrEmpty(r.Tel) && r.Tel != main.Tel);
+                    if (third != null && string.IsNullOrWhiteSpace(main.Tel3))
+                    {
+                        main.Tel3 = third?.Tel;
+                    }
+                    else if (third != null && !string.IsNullOrWhiteSpace(main.Tel3))
+                    {
+                        Console.WriteLine($"Due to max numbers, skipped {third.Tel} for {main.FullName}.");
+                    }
 
-                    main.Tel2 = second.Tel;
-                    main.Tel3 = third?.Tel;
-
-                    //If tel1 is not a mobile number and tel2 is a mobile number, swap them
+                    //If tel1 is not a mobile number and tel2 or tel3 are a mobile number, swap them
                     var tel1 = main.Tel ?? string.Empty;
                     var tel2 = main.Tel2 ?? string.Empty;
                     var tel3 = main.Tel3 ?? string.Empty;
@@ -104,7 +130,7 @@ partial class Program
                         main.Tel = tel2;
                         main.Tel2 = tel1;
                     }
-                    if (!tel1.StartsWith("05") && tel3.StartsWith("05"))
+                    else if (!tel1.StartsWith("05") && tel3.StartsWith("05"))
                     {
                         main.Tel = tel3;
                         main.Tel3 = tel1;
@@ -132,9 +158,9 @@ partial class Program
                 {
                     current = new VCardRecord();
                 }
-                else if (line.StartsWith("N") && current != null)
+                else if (line.StartsWith('N') && current != null)
                 {
-                    var lineValue = LineRegex().Match(line).Groups[1].Value;
+                    var lineValue = LineRegex().Match(line).Groups[1].Value.Trim();
 
                     if (line.Contains("ENCODING=QUOTED-PRINTABLE"))
                     {
@@ -144,7 +170,7 @@ partial class Program
                 }
                 else if (line.StartsWith("FN") && current != null)
                 {
-                    var lineValue = LineRegex().Match(line).Groups[1].Value;
+                    var lineValue = LineRegex().Match(line).Groups[1].Value.Trim();
 
                     if (line.Contains("ENCODING=QUOTED-PRINTABLE"))
                     {
@@ -154,7 +180,7 @@ partial class Program
                 }
                 else if (line.StartsWith("TEL") && current != null)
                 {
-                    var val = GetFixedPhoneNumber(line);
+                    var val = GetFixedPhoneNumber(line.Trim());
                     if (string.IsNullOrEmpty(current.Tel))
                     {
                         current.Tel = val;
@@ -312,7 +338,7 @@ partial class Program
     private static partial Regex PhoneRegex();
 
     [GeneratedRegex(@".+\:(.+)")]
-    private static partial Regex LineRegex();  
+    private static partial Regex LineRegex();
 
     public class VCardRecord
     {
