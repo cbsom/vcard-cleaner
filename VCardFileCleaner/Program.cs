@@ -5,13 +5,12 @@ using Sylvan.Data;
 using Sylvan.Data.Csv;
 
 /**
- * This program reads a vCard (.vcf) file from the specified path, 
+ * This program loads either a vCard (.vcf) file or a csv file from the supplied path, 
  * parses each contact into objects, 
  * cleans the phone numbers if necessary, 
  * merges the records that share the same name but have different phone numbers, 
  * removes duplicates, 
- * then writes the distinct records back to a new vcf file
- * and/or a new csv file.
+ * writes the distinct records back to a new vcf file and/or a new csv file.
  */
 partial class Program
 {
@@ -19,7 +18,7 @@ partial class Program
     {
         if (args.Length < 1)
         {
-            Console.WriteLine("Usage: VCFDuplicateRemover.exe <input file path>");
+            Console.WriteLine("Usage: VCardFileCleaner.exe <input file path>");
             DoExit();
             return;
         }
