@@ -14,31 +14,83 @@ using Sylvan.Data.Csv;
  */
 partial class Program
 {
+    private static bool _convertToCSV = false;
+    private static bool _convertToVCF = false;
+
     static void Main(string[] args)
     {
+        _convertToCSV = args.Contains("-csv") || args.Contains("--csv");
+        _convertToVCF = args.Contains("-vcf") || args.Contains("--vcf");
+
         if (args.Length < 1)
         {
-            Console.WriteLine("Usage: VCardFileCleaner.exe <input file path>");
+            Console.WriteLine("Usage: VCardFileCleaner.exe <options> <input file path>");
+            Console.WriteLine("Run VCardFileCleaner.exe -help for more information.");
             DoExit();
             return;
         }
-        var path = args[0];
+        if (args.Contains("-help") || args.Contains("-h"))
+        {
+            Console.WriteLine("Usage: VCardFileCleaner.exe <options> <input file path>");
+            Console.WriteLine("Options:");
+            Console.WriteLine("\t-csv: Convert the input file to a CSV file.");
+            Console.WriteLine("\t-vcf: Convert the input file to a VCF file.");
+            DoExit();
+            return;
+        }
+        var path = args[^1];
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
         {
-            Console.WriteLine("Invalid path: " + path);
+            Console.WriteLine("\nInvalid path: " + path);
             DoExit();
             return;
         }
+
         var records = Path.GetExtension(path).ToLowerInvariant() == ".vcf"
             ? LoadVCardFile(path)
             : LoadCSVFile(path);
         if (records == null || records.Count == 0)
         {
-            Console.WriteLine("List is empty.");
+            Console.WriteLine("\nList is empty.");
             DoExit();
             return;
         }
 
+        if (_convertToCSV)
+        {
+            var csvPath = Path.Combine(Path.GetDirectoryName(path) ?? string.Empty,
+                $"{Path.GetFileNameWithoutExtension(path)}.csv");
+            while (File.Exists(csvPath))
+            {
+                csvPath = Path.Combine(Path.GetDirectoryName(path) ?? string.Empty,
+                            $"{Path.GetFileNameWithoutExtension(path)}_{DateTime.Now:yyyyMMddHHmmss}.csv");
+            }
+            Task.Run(() => SaveCSVFileAsync(records, csvPath));
+            Console.WriteLine($"CSV file saved to {csvPath}");
+            Console.WriteLine($"\nPress <ENTER> to open {csvPath} and exit this program.");
+            Console.WriteLine($"Press <CNTL+C> to exit this program now.");
+            Console.ReadLine();
+            System.Diagnostics.Process.Start("explorer", "\"" + csvPath + "\"");
+            return;
+        }
+        if (_convertToVCF)
+        {
+            var vcfPath = Path.Combine(Path.GetDirectoryName(path) ?? string.Empty,
+                $"{Path.GetFileNameWithoutExtension(path)}.vcf");
+
+            while (File.Exists(vcfPath))
+            {
+                vcfPath = Path.Combine(Path.GetDirectoryName(path) ?? string.Empty,
+                            $"{Path.GetFileNameWithoutExtension(path)}_{DateTime.Now:yyyyMMddHHmmss}.vcf");
+            }
+            File.WriteAllLines(vcfPath, GetVCFLines(records));
+            Console.WriteLine($"Saved {records.Count} records to {vcfPath}");
+            Console.WriteLine($"\nPress <ENTER> to open {vcfPath} and exit this program.");
+            Console.WriteLine($"Press <CNTL+C> to exit this program now.");
+            Console.ReadLine();
+            System.Diagnostics.Process.Start("explorer", "\"" + vcfPath + "\"");
+            return;
+        }
         //Combine records
         records = CombineRecords(records);
 
@@ -49,7 +101,7 @@ partial class Program
             .Where(g => g.Count() > 1)
             .ToList();
 
-        if (duplicates.Count > 0)
+        if (duplicates.Count > 0 && !_convertToCSV && !_convertToVCF)
         {
             foreach (var group in duplicates)
             {
@@ -62,7 +114,7 @@ partial class Program
         var distinctRecords = records.Distinct(comparer).ToList();
 
         // Ask if the user wants to save the combined/distinct records as a VCF file
-        Console.WriteLine("Do you want to save the records as a VCard file? (y/n)");
+        Console.WriteLine("\nDo you want to save the combined/distinct records as a VCard file? (y/n)");
         var answerVCF = Console.ReadLine();
         if (answerVCF?.Equals("y", StringComparison.OrdinalIgnoreCase) == true)
         {
@@ -74,7 +126,7 @@ partial class Program
         }
 
         // Ask if the user wants to save the combined/distinct records as a CSV file
-        Console.WriteLine("Do you want to save the records as a CSV file? (y/n)");
+        Console.WriteLine("\nDo you want to save the combined/distinct records as a CSV file? (y/n)");
         var answerCSV = Console.ReadLine();
         if (answerVCF?.Equals("y", StringComparison.OrdinalIgnoreCase) == true)
         {
@@ -91,7 +143,7 @@ partial class Program
 
     private static void DoExit()
     {
-        Console.WriteLine("Press <ENTER> to exit...:)");
+        Console.WriteLine("\nPress <ENTER> to exit...:)");
         Console.ReadLine();
     }
 
@@ -129,7 +181,7 @@ partial class Program
                         !string.IsNullOrEmpty(r.Tel) && r.Tel != main.Tel);
                     if (third != null && string.IsNullOrWhiteSpace(main.Tel3))
                     {
-                        main.Tel3 = third?.Tel;
+                        main.Tel3 = third.Tel;
                     }
                     else if (third != null && !string.IsNullOrWhiteSpace(main.Tel3))
                     {
@@ -270,11 +322,11 @@ partial class Program
         }
     }
 
-    private static string? GetFixedPhoneNumber(string? line)
+    private static string GetFixedPhoneNumber(string? line)
     {
         if (string.IsNullOrWhiteSpace(line))
         {
-            return null;
+            return "";
         }
         var fixedValue = PhoneRegex().Match(line).Value.Replace("+972", "0").Replace("+", "013");
         if (fixedValue.StartsWith("012"))
@@ -295,12 +347,12 @@ partial class Program
             {
                 fixedValue = string.Concat("0131", fixedValue);
             }
-            else
+            else if (!_convertToCSV && !_convertToVCF)
             {
                 Console.WriteLine($"Invalid phone number: {fixedValue}");
             }
         }
-        return fixedValue;
+        return fixedValue ?? "";
     }
 
     private static List<string> GetVCFLines(IEnumerable<VCardRecord> records)
@@ -339,7 +391,12 @@ partial class Program
 
     private static async Task SaveCSVFileAsync(IEnumerable<VCardRecord> records, string path)
     {
-        using var writer = CsvDataWriter.Create(path);
+        using var writer = CsvDataWriter.Create(path, new CsvDataWriterOptions
+        {
+            WriteHeaders = true,
+            QuoteStrings = CsvStringQuoting.AlwaysQuote,
+            Style = CsvStyle.Standard
+        });
         await writer.WriteAsync(records.AsDataReader());
     }
 
@@ -368,11 +425,11 @@ partial class Program
 
     public class VCardRecord
     {
-        public string? Name { get; set; }
-        public string? FullName { get; set; }
-        public string? Tel { get; set; }
-        public string? Tel2 { get; set; }
-        public string? Tel3 { get; set; }
+        public string Name { get; set; } = "";
+        public string FullName { get; set; } = "";
+        public string Tel { get; set; } = "";
+        public string Tel2 { get; set; } = "";
+        public string Tel3 { get; set; } = "";
     }
 
     public class VCardRecordComparer : IEqualityComparer<VCardRecord>
