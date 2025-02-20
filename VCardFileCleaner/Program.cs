@@ -42,6 +42,21 @@ partial class Program
         //Combine records
         records = CombineRecords(records);
 
+        //Find duplicate phone numbers
+        var duplicates = records.SelectMany(r => new[] { r.Tel, r.Tel2, r.Tel3 })
+            .Where(t => !string.IsNullOrWhiteSpace(t))
+            .GroupBy(t => t)
+            .Where(g => g.Count() > 1)
+            .ToList();
+
+        if (duplicates.Count > 0)
+        {
+            foreach (var group in duplicates)
+            {
+                Console.WriteLine("Duplicate phone number: " + group.Key + " - Found " + group.Count() + " times.");
+            }
+        }
+
         //Remove duplicates.
         var comparer = new VCardRecordComparer();
         var distinctRecords = records.Distinct(comparer).ToList();
@@ -270,9 +285,20 @@ partial class Program
         {
             fixedValue = string.Concat("013", fixedValue.AsSpan(2));
         }
+        if (fixedValue.StartsWith("1") && fixedValue.Length == 11)
+        {
+            fixedValue = string.Concat("013", fixedValue);
+        }
         if (!fixedValue.StartsWith("0"))
         {
-            Console.WriteLine($"Invalid phone number: {fixedValue}");
+            if (fixedValue.Length == 10)
+            {
+                fixedValue = string.Concat("0131", fixedValue);
+            }
+            else
+            {
+                Console.WriteLine($"Invalid phone number: {fixedValue}");
+            }
         }
         return fixedValue;
     }
