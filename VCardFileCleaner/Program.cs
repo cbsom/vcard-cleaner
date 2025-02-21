@@ -221,30 +221,9 @@ partial class Program
 
             foreach (var line in lines)
             {
-                if (line.StartsWith("BEGIN:VCARD"))
-                {
-                    current = new VCardRecord();
-                }
-                else if (line.StartsWith('N') && current != null)
-                {
-                    var lineValue = LineRegex().Match(line).Groups[1].Value.Trim();
-
-                    if (line.Contains("ENCODING=QUOTED-PRINTABLE"))
-                    {
-                        lineValue = DecodeQuotedPrintable(lineValue);
-                    }
-                    current.Name = lineValue;
-                }
-                else if (line.StartsWith("FN") && current != null)
-                {
-                    var lineValue = LineRegex().Match(line).Groups[1].Value.Trim();
-
-                    if (line.Contains("ENCODING=QUOTED-PRINTABLE"))
-                    {
-                        lineValue = DecodeQuotedPrintable(lineValue);
-                    }
-                    current.FullName = lineValue;
-                }
+                if (line.StartsWith("BEGIN:VCARD")) { current = new VCardRecord(); }
+                else if (line.StartsWith('N') && current != null) { current.Name = GetLineValue(line); }
+                else if (line.StartsWith("FN") && current != null) { current.FullName = GetLineValue(line); }
                 else if (line.StartsWith("TEL") && current != null)
                 {
                     var val = GetFixedPhoneNumber(line.Trim());
@@ -261,6 +240,51 @@ partial class Program
                         current.Tel3 = val;
                     }
                 }
+                else if (line.StartsWith("EMAIL") && current != null) { current.Email = GetLineValue(line); }
+                else if (line.StartsWith("SOURCE") && current != null) { current.SOURCE = GetLineValue(line); }
+                else if (line.StartsWith("KIND") && current != null) { current.KIND = GetLineValue(line); }
+                else if (line.StartsWith("XML") && current != null) { current.XML = GetLineValue(line); }
+                else if (line.StartsWith("NICKNAME") && current != null) { current.NICKNAME = GetLineValue(line); }
+                else if (line.StartsWith("PHOTO") && current != null) { current.PHOTO = GetLineValue(line); }
+                else if (line.StartsWith("BDAY") && current != null) { current.BDAY = GetLineValue(line); }
+                else if (line.StartsWith("ANNIVERSARY") && current != null) { current.ANNIVERSARY = GetLineValue(line); }
+                else if (line.StartsWith("GENDER") && current != null) { current.GENDER = GetLineValue(line); }
+                else if (line.StartsWith("ADR") && current != null) { current.ADR = GetLineValue(line); }
+                else if (line.StartsWith("IMPP") && current != null) { current.IMPP = GetLineValue(line); }
+                else if (line.StartsWith("LANG") && current != null) { current.LANG = GetLineValue(line); }
+                else if (line.StartsWith("TZ") && current != null) { current.TZ = GetLineValue(line); }
+                else if (line.StartsWith("GEO") && current != null) { current.GEO = GetLineValue(line); }
+                else if (line.StartsWith("TITLE") && current != null) { current.TITLE = GetLineValue(line); }
+                else if (line.StartsWith("ROLE") && current != null) { current.ROLE = GetLineValue(line); }
+                else if (line.StartsWith("LOGO") && current != null) { current.LOGO = GetLineValue(line); }
+                else if (line.StartsWith("ORG") && current != null) { current.ORG = GetLineValue(line); }
+                else if (line.StartsWith("MEMBER") && current != null) { current.MEMBER = GetLineValue(line); }
+                else if (line.StartsWith("RELATED") && current != null) { current.RELATED = GetLineValue(line); }
+                else if (line.StartsWith("CATEGORIES") && current != null) { current.CATEGORIES = GetLineValue(line); }
+                else if (line.StartsWith("NOTE") && current != null) { current.NOTE = GetLineValue(line); }
+                else if (line.StartsWith("PRODID") && current != null) { current.PRODID = GetLineValue(line); }
+                else if (line.StartsWith("REV") && current != null) { current.REV = GetLineValue(line); }
+                else if (line.StartsWith("SOUND") && current != null) { current.SOUND = GetLineValue(line); }
+                else if (line.StartsWith("UID") && current != null) { current.UID = GetLineValue(line); }
+                else if (line.StartsWith("CLIENTPIDMAP") && current != null) { current.CLIENTPIDMAP = GetLineValue(line); }
+                else if (line.StartsWith("URL") && current != null) { current.URL = GetLineValue(line); }
+                else if (line.StartsWith("VERSION") && current != null) { current.VERSION = GetLineValue(line); }
+                else if (line.StartsWith("KEY") && current != null) { current.KEY = GetLineValue(line); }
+                else if (line.StartsWith("FBURL") && current != null) { current.FBURL = GetLineValue(line); }
+                else if (line.StartsWith("CALADRURI") && current != null) { current.CALADRURI = GetLineValue(line); }
+                else if (line.StartsWith("CALURI") && current != null) { current.CALURI = GetLineValue(line); }
+                else if (line.StartsWith("BIRTHPLACE") && current != null) { current.BIRTHPLACE = GetLineValue(line); }
+                else if (line.StartsWith("DEATHPLACE") && current != null) { current.DEATHPLACE = GetLineValue(line); }
+                else if (line.StartsWith("DEATHDATE") && current != null) { current.DEATHDATE = GetLineValue(line); }
+                else if (line.StartsWith("EXPERTISE") && current != null) { current.EXPERTISE = GetLineValue(line); }
+                else if (line.StartsWith("HOBBY") && current != null) { current.HOBBY = GetLineValue(line); }
+                else if (line.StartsWith("INTEREST") && current != null) { current.INTEREST = GetLineValue(line); }
+                else if (line.StartsWith("ORG-DIRECTORY") && current != null) { current.ORG_DIRECTORY = GetLineValue(line); }
+                else if (line.StartsWith("CONTACT-URI") && current != null) { current.CONTACT_URI = GetLineValue(line); }
+                else if (line.StartsWith("CREATED") && current != null) { current.CREATED = GetLineValue(line); }                
+                else if (line.StartsWith("LANGUAGE") && current != null) { current.LANGUAGE = GetLineValue(line); }                
+                else if (line.StartsWith("SOCIALPROFILE") && current != null) { current.SOCIALPROFILE = GetLineValue(line); }
+                else if (line.StartsWith("JSPROP") && current != null) { current.JSPROP = GetLineValue(line); }
                 else if (line.StartsWith("END:VCARD") && current != null)
                 {
                     if (string.IsNullOrWhiteSpace(current.Name))
@@ -285,6 +309,16 @@ partial class Program
         }
     }
 
+    private static string GetLineValue(string line)
+    {
+        var lineValue = LineRegex().Match(line).Groups[1].Value.Trim();
+        if (line.Contains("ENCODING=QUOTED-PRINTABLE"))
+        {
+            lineValue = DecodeQuotedPrintable(lineValue);
+        }
+        return lineValue;
+    }
+
     private static List<VCardRecord>? LoadCSVFile(string filePath)
     {
         try
@@ -301,17 +335,57 @@ partial class Program
                 {
                     r.Tel = r.Name ?? r.Tel;
                 }
-                if (r.Name != null && r.Name.Contains("ENCODING=QUOTED-PRINTABLE"))
-                {
-                    r.Name = DecodeQuotedPrintable(r.Name);
-                }
-                if (r.FullName != null && r.FullName.Contains("ENCODING=QUOTED-PRINTABLE"))
-                {
-                    r.Name = DecodeQuotedPrintable(r.FullName);
-                }
+                if (!string.IsNullOrWhiteSpace(r.Name) && r.Name.Contains("ENCODING=QUOTED-PRINTABLE")) { r.Name = DecodeQuotedPrintable(r.Name); }
+                if (!string.IsNullOrWhiteSpace(r.FullName) && r.FullName.Contains("ENCODING=QUOTED-PRINTABLE")) { r.Name = DecodeQuotedPrintable(r.FullName); }
                 r.Tel = GetFixedPhoneNumber(r.Tel);
                 r.Tel2 = GetFixedPhoneNumber(r.Tel2);
                 r.Tel3 = GetFixedPhoneNumber(r.Tel3);
+                if (!string.IsNullOrWhiteSpace(r.Email) && r.Email.Contains("ENCODING=QUOTED-PRINTABLE")) { r.Email = DecodeQuotedPrintable(r.Email); }
+                if (!string.IsNullOrWhiteSpace(r.SOURCE) && r.SOURCE.Contains("ENCODING=QUOTED-PRINTABLE")) { r.SOURCE = DecodeQuotedPrintable(r.SOURCE); }
+                if (!string.IsNullOrWhiteSpace(r.KIND) && r.KIND.Contains("ENCODING=QUOTED-PRINTABLE")) { r.KIND = DecodeQuotedPrintable(r.KIND); }
+                if (!string.IsNullOrWhiteSpace(r.XML) && r.XML.Contains("ENCODING=QUOTED-PRINTABLE")) { r.XML = DecodeQuotedPrintable(r.XML); }
+                if (!string.IsNullOrWhiteSpace(r.NICKNAME) && r.NICKNAME.Contains("ENCODING=QUOTED-PRINTABLE")) { r.NICKNAME = DecodeQuotedPrintable(r.NICKNAME); }
+                if (!string.IsNullOrWhiteSpace(r.PHOTO) && r.PHOTO.Contains("ENCODING=QUOTED-PRINTABLE")) { r.PHOTO = DecodeQuotedPrintable(r.PHOTO); }
+                if (!string.IsNullOrWhiteSpace(r.BDAY) && r.BDAY.Contains("ENCODING=QUOTED-PRINTABLE")) { r.BDAY = DecodeQuotedPrintable(r.BDAY); }
+                if (!string.IsNullOrWhiteSpace(r.ANNIVERSARY) && r.ANNIVERSARY.Contains("ENCODING=QUOTED-PRINTABLE")) { r.ANNIVERSARY = DecodeQuotedPrintable(r.ANNIVERSARY); }
+                if (!string.IsNullOrWhiteSpace(r.GENDER) && r.GENDER.Contains("ENCODING=QUOTED-PRINTABLE")) { r.GENDER = DecodeQuotedPrintable(r.GENDER); }
+                if (!string.IsNullOrWhiteSpace(r.ADR) && r.ADR.Contains("ENCODING=QUOTED-PRINTABLE")) { r.ADR = DecodeQuotedPrintable(r.ADR); }
+                if (!string.IsNullOrWhiteSpace(r.IMPP) && r.IMPP.Contains("ENCODING=QUOTED-PRINTABLE")) { r.IMPP = DecodeQuotedPrintable(r.IMPP); }
+                if (!string.IsNullOrWhiteSpace(r.LANG) && r.LANG.Contains("ENCODING=QUOTED-PRINTABLE")) { r.LANG = DecodeQuotedPrintable(r.LANG); }
+                if (!string.IsNullOrWhiteSpace(r.TZ) && r.TZ.Contains("ENCODING=QUOTED-PRINTABLE")) { r.TZ = DecodeQuotedPrintable(r.TZ); }
+                if (!string.IsNullOrWhiteSpace(r.GEO) && r.GEO.Contains("ENCODING=QUOTED-PRINTABLE")) { r.GEO = DecodeQuotedPrintable(r.GEO); }
+                if (!string.IsNullOrWhiteSpace(r.TITLE) && r.TITLE.Contains("ENCODING=QUOTED-PRINTABLE")) { r.TITLE = DecodeQuotedPrintable(r.TITLE); }
+                if (!string.IsNullOrWhiteSpace(r.ROLE) && r.ROLE.Contains("ENCODING=QUOTED-PRINTABLE")) { r.ROLE = DecodeQuotedPrintable(r.ROLE); }
+                if (!string.IsNullOrWhiteSpace(r.LOGO) && r.LOGO.Contains("ENCODING=QUOTED-PRINTABLE")) { r.LOGO = DecodeQuotedPrintable(r.LOGO); }
+                if (!string.IsNullOrWhiteSpace(r.ORG) && r.ORG.Contains("ENCODING=QUOTED-PRINTABLE")) { r.ORG = DecodeQuotedPrintable(r.ORG); }
+                if (!string.IsNullOrWhiteSpace(r.MEMBER) && r.MEMBER.Contains("ENCODING=QUOTED-PRINTABLE")) { r.MEMBER = DecodeQuotedPrintable(r.MEMBER); }
+                if (!string.IsNullOrWhiteSpace(r.RELATED) && r.RELATED.Contains("ENCODING=QUOTED-PRINTABLE")) { r.RELATED = DecodeQuotedPrintable(r.RELATED); }
+                if (!string.IsNullOrWhiteSpace(r.CATEGORIES) && r.CATEGORIES.Contains("ENCODING=QUOTED-PRINTABLE")) { r.CATEGORIES = DecodeQuotedPrintable(r.CATEGORIES); }
+                if (!string.IsNullOrWhiteSpace(r.NOTE) && r.NOTE.Contains("ENCODING=QUOTED-PRINTABLE")) { r.NOTE = DecodeQuotedPrintable(r.NOTE); }
+                if (!string.IsNullOrWhiteSpace(r.PRODID) && r.PRODID.Contains("ENCODING=QUOTED-PRINTABLE")) { r.PRODID = DecodeQuotedPrintable(r.PRODID); }
+                if (!string.IsNullOrWhiteSpace(r.REV) && r.REV.Contains("ENCODING=QUOTED-PRINTABLE")) { r.REV = DecodeQuotedPrintable(r.REV); }
+                if (!string.IsNullOrWhiteSpace(r.SOUND) && r.SOUND.Contains("ENCODING=QUOTED-PRINTABLE")) { r.SOUND = DecodeQuotedPrintable(r.SOUND); }
+                if (!string.IsNullOrWhiteSpace(r.UID) && r.UID.Contains("ENCODING=QUOTED-PRINTABLE")) { r.UID = DecodeQuotedPrintable(r.UID); }
+                if (!string.IsNullOrWhiteSpace(r.CLIENTPIDMAP) && r.CLIENTPIDMAP.Contains("ENCODING=QUOTED-PRINTABLE")) { r.CLIENTPIDMAP = DecodeQuotedPrintable(r.CLIENTPIDMAP); }
+                if (!string.IsNullOrWhiteSpace(r.URL) && r.URL.Contains("ENCODING=QUOTED-PRINTABLE")) { r.URL = DecodeQuotedPrintable(r.URL); }
+                if (!string.IsNullOrWhiteSpace(r.VERSION) && r.VERSION.Contains("ENCODING=QUOTED-PRINTABLE")) { r.VERSION = DecodeQuotedPrintable(r.VERSION); }
+                if (!string.IsNullOrWhiteSpace(r.KEY) && r.KEY.Contains("ENCODING=QUOTED-PRINTABLE")) { r.KEY = DecodeQuotedPrintable(r.KEY); }
+                if (!string.IsNullOrWhiteSpace(r.FBURL) && r.FBURL.Contains("ENCODING=QUOTED-PRINTABLE")) { r.FBURL = DecodeQuotedPrintable(r.FBURL); }
+                if (!string.IsNullOrWhiteSpace(r.CALADRURI) && r.CALADRURI.Contains("ENCODING=QUOTED-PRINTABLE")) { r.CALADRURI = DecodeQuotedPrintable(r.CALADRURI); }
+                if (!string.IsNullOrWhiteSpace(r.CALURI) && r.CALURI.Contains("ENCODING=QUOTED-PRINTABLE")) { r.CALURI = DecodeQuotedPrintable(r.CALURI); }
+                if (!string.IsNullOrWhiteSpace(r.BIRTHPLACE) && r.BIRTHPLACE.Contains("ENCODING=QUOTED-PRINTABLE")) { r.BIRTHPLACE = DecodeQuotedPrintable(r.BIRTHPLACE); }
+                if (!string.IsNullOrWhiteSpace(r.DEATHPLACE) && r.DEATHPLACE.Contains("ENCODING=QUOTED-PRINTABLE")) { r.DEATHPLACE = DecodeQuotedPrintable(r.DEATHPLACE); }
+                if (!string.IsNullOrWhiteSpace(r.DEATHDATE) && r.DEATHDATE.Contains("ENCODING=QUOTED-PRINTABLE")) { r.DEATHDATE = DecodeQuotedPrintable(r.DEATHDATE); }
+                if (!string.IsNullOrWhiteSpace(r.EXPERTISE) && r.EXPERTISE.Contains("ENCODING=QUOTED-PRINTABLE")) { r.EXPERTISE = DecodeQuotedPrintable(r.EXPERTISE); }
+                if (!string.IsNullOrWhiteSpace(r.HOBBY) && r.HOBBY.Contains("ENCODING=QUOTED-PRINTABLE")) { r.HOBBY = DecodeQuotedPrintable(r.HOBBY); }
+                if (!string.IsNullOrWhiteSpace(r.INTEREST) && r.INTEREST.Contains("ENCODING=QUOTED-PRINTABLE")) { r.INTEREST = DecodeQuotedPrintable(r.INTEREST); }
+                if (!string.IsNullOrWhiteSpace(r.ORG_DIRECTORY) && r.ORG_DIRECTORY.Contains("ENCODING=QUOTED-PRINTABLE")) { r.ORG_DIRECTORY = DecodeQuotedPrintable(r.ORG_DIRECTORY); }
+                if (!string.IsNullOrWhiteSpace(r.CONTACT_URI) && r.CONTACT_URI.Contains("ENCODING=QUOTED-PRINTABLE")) { r.CONTACT_URI = DecodeQuotedPrintable(r.CONTACT_URI); }
+                if (!string.IsNullOrWhiteSpace(r.CREATED) && r.CREATED.Contains("ENCODING=QUOTED-PRINTABLE")) { r.CREATED = DecodeQuotedPrintable(r.CREATED); }                
+                if (!string.IsNullOrWhiteSpace(r.LANGUAGE) && r.LANGUAGE.Contains("ENCODING=QUOTED-PRINTABLE")) { r.LANGUAGE = DecodeQuotedPrintable(r.LANGUAGE); }                
+                if (!string.IsNullOrWhiteSpace(r.SOCIALPROFILE) && r.SOCIALPROFILE.Contains("ENCODING=QUOTED-PRINTABLE")) { r.SOCIALPROFILE = DecodeQuotedPrintable(r.SOCIALPROFILE); }
+                if (!string.IsNullOrWhiteSpace(r.JSPROP) && r.JSPROP.Contains("ENCODING=QUOTED-PRINTABLE")) { r.JSPROP = DecodeQuotedPrintable(r.JSPROP); }
+
             });
             return records;
         }
@@ -363,26 +437,56 @@ partial class Program
         {
             lines.Add("BEGIN:VCARD");
             lines.Add("VERSION:3.0");
-            if (!string.IsNullOrWhiteSpace(record.Name))
-            {
-                lines.Add("N:;" + record.Name.Trim());
-            }
-            if (!string.IsNullOrWhiteSpace(record.FullName))
-            {
-                lines.Add("FN:" + record.FullName.Trim());
-            }
-            if (!string.IsNullOrWhiteSpace(record.Tel))
-            {
-                lines.Add("TEL;TYPE=CELL:" + record.Tel.Trim());
-            }
-            if (!string.IsNullOrWhiteSpace(record.Tel2))
-            {
-                lines.Add("TEL;TYPE=HOME:" + record.Tel2.Trim());
-            }
-            if (!string.IsNullOrWhiteSpace(record.Tel3))
-            {
-                lines.Add("TEL;TYPE=WORK:" + record.Tel3.Trim());
-            }
+            if (!string.IsNullOrWhiteSpace(record.Name)) { lines.Add("N:;" + record.Name.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.FullName)) { lines.Add("FN:" + record.FullName.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.Tel)) { lines.Add("TEL;TYPE=CELL:" + record.Tel.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.Tel2)) { lines.Add("TEL;TYPE=HOME:" + record.Tel2.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.Tel3)) { lines.Add("TEL;TYPE=WORK:" + record.Tel3.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.Email)) { lines.Add("EMAIL:" + record.Email.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.SOURCE)) { lines.Add("SOURCE:" + record.SOURCE.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.KIND)) { lines.Add("KIND:" + record.KIND.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.XML)) { lines.Add("XML:" + record.XML.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.NICKNAME)) { lines.Add("NICKNAME:" + record.NICKNAME.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.PHOTO)) { lines.Add("PHOTO:" + record.PHOTO.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.BDAY)) { lines.Add("BDAY:" + record.BDAY.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.ANNIVERSARY)) { lines.Add("ANNIVERSARY:" + record.ANNIVERSARY.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.GENDER)) { lines.Add("GENDER:" + record.GENDER.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.ADR)) { lines.Add("ADR:" + record.ADR.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.IMPP)) { lines.Add("IMPP:" + record.IMPP.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.LANG)) { lines.Add("LANG:" + record.LANG.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.TZ)) { lines.Add("TZ:" + record.TZ.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.GEO)) { lines.Add("GEO:" + record.GEO.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.TITLE)) { lines.Add("TITLE:" + record.TITLE.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.ROLE)) { lines.Add("ROLE:" + record.ROLE.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.LOGO)) { lines.Add("LOGO:" + record.LOGO.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.ORG)) { lines.Add("ORG:" + record.ORG.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.MEMBER)) { lines.Add("MEMBER:" + record.MEMBER.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.RELATED)) { lines.Add("RELATED:" + record.RELATED.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.CATEGORIES)) { lines.Add("CATEGORIES:" + record.CATEGORIES.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.NOTE)) { lines.Add("NOTE:" + record.NOTE.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.PRODID)) { lines.Add("PRODID:" + record.PRODID.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.REV)) { lines.Add("REV:" + record.REV.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.SOUND)) { lines.Add("SOUND:" + record.SOUND.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.UID)) { lines.Add("UID:" + record.UID.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.CLIENTPIDMAP)) { lines.Add("CLIENTPIDMAP:" + record.CLIENTPIDMAP.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.URL)) { lines.Add("URL:" + record.URL.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.VERSION)) { lines.Add("VERSION:" + record.VERSION.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.KEY)) { lines.Add("KEY:" + record.KEY.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.FBURL)) { lines.Add("FBURL:" + record.FBURL.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.CALADRURI)) { lines.Add("CALADRURI:" + record.CALADRURI.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.CALURI)) { lines.Add("CALURI:" + record.CALURI.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.BIRTHPLACE)) { lines.Add("BIRTHPLACE:" + record.BIRTHPLACE.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.DEATHPLACE)) { lines.Add("DEATHPLACE:" + record.DEATHPLACE.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.DEATHDATE)) { lines.Add("DEATHDATE:" + record.DEATHDATE.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.EXPERTISE)) { lines.Add("EXPERTISE:" + record.EXPERTISE.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.HOBBY)) { lines.Add("HOBBY:" + record.HOBBY.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.INTEREST)) { lines.Add("INTEREST:" + record.INTEREST.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.ORG_DIRECTORY)) { lines.Add("ORG-DIRECTORY:" + record.ORG_DIRECTORY.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.CONTACT_URI)) { lines.Add("CONTACT-URI:" + record.CONTACT_URI.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.CREATED)) { lines.Add("CREATED:" + record.CREATED.Trim()); }            
+            if (!string.IsNullOrWhiteSpace(record.LANGUAGE)) { lines.Add("LANGUAGE:" + record.LANGUAGE.Trim()); }            
+            if (!string.IsNullOrWhiteSpace(record.SOCIALPROFILE)) { lines.Add("SOCIALPROFILE:" + record.SOCIALPROFILE.Trim()); }
+            if (!string.IsNullOrWhiteSpace(record.JSPROP)) { lines.Add("JSPROP:" + record.JSPROP.Trim()); }
             lines.Add("END:VCARD");
         }
 
@@ -430,6 +534,51 @@ partial class Program
         public string Tel { get; set; } = "";
         public string Tel2 { get; set; } = "";
         public string Tel3 { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string SOURCE { get; set; } = "";
+        public string KIND { get; set; } = "";
+        public string XML { get; set; } = "";
+        public string NICKNAME { get; set; } = "";
+        public string PHOTO { get; set; } = "";
+        public string BDAY { get; set; } = "";
+        public string ANNIVERSARY { get; set; } = "";
+        public string GENDER { get; set; } = "";
+        public string ADR { get; set; } = "";
+        public string IMPP { get; set; } = "";
+        public string LANG { get; set; } = "";
+        public string TZ { get; set; } = "";
+        public string GEO { get; set; } = "";
+        public string TITLE { get; set; } = "";
+        public string ROLE { get; set; } = "";
+        public string LOGO { get; set; } = "";
+        public string ORG { get; set; } = "";
+        public string MEMBER { get; set; } = "";
+        public string RELATED { get; set; } = "";
+        public string CATEGORIES { get; set; } = "";
+        public string NOTE { get; set; } = "";
+        public string PRODID { get; set; } = "";
+        public string REV { get; set; } = "";
+        public string SOUND { get; set; } = "";
+        public string UID { get; set; } = "";
+        public string CLIENTPIDMAP { get; set; } = "";
+        public string URL { get; set; } = "";
+        public string VERSION { get; set; } = "";
+        public string KEY { get; set; } = "";
+        public string FBURL { get; set; } = "";
+        public string CALADRURI { get; set; } = "";
+        public string CALURI { get; set; } = "";
+        public string BIRTHPLACE { get; set; } = "";
+        public string DEATHPLACE { get; set; } = "";
+        public string DEATHDATE { get; set; } = "";
+        public string EXPERTISE { get; set; } = "";
+        public string HOBBY { get; set; } = "";
+        public string INTEREST { get; set; } = "";
+        public string ORG_DIRECTORY { get; set; } = "";
+        public string CONTACT_URI { get; set; } = "";
+        public string CREATED { get; set; } = "";
+        public string LANGUAGE { get; set; } = "";        
+        public string SOCIALPROFILE { get; set; } = "";
+        public string JSPROP { get; set; } = "";
     }
 
     public class VCardRecordComparer : IEqualityComparer<VCardRecord>
