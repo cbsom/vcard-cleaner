@@ -269,8 +269,7 @@ namespace VCardFileCleaner
                     else if (line.StartsWith("SOUND") && current != null) { current.SOUND = GetLineValue(line); }
                     else if (line.StartsWith("UID") && current != null) { current.UID = GetLineValue(line); }
                     else if (line.StartsWith("CLIENTPIDMAP") && current != null) { current.CLIENTPIDMAP = GetLineValue(line); }
-                    else if (line.StartsWith("URL") && current != null) { current.URL = GetLineValue(line); }
-                    else if (line.StartsWith("VERSION") && current != null) { current.VERSION = GetLineValue(line); }
+                    else if (line.StartsWith("URL") && current != null) { current.URL = GetLineValue(line); }                    
                     else if (line.StartsWith("KEY") && current != null) { current.KEY = GetLineValue(line); }
                     else if (line.StartsWith("FBURL") && current != null) { current.FBURL = GetLineValue(line); }
                     else if (line.StartsWith("CALADRURI") && current != null) { current.CALADRURI = GetLineValue(line); }
@@ -369,8 +368,7 @@ namespace VCardFileCleaner
                     if (!string.IsNullOrWhiteSpace(r.SOUND) && r.SOUND.Contains("ENCODING=QUOTED-PRINTABLE")) { r.SOUND = DecodeQuotedPrintable(r.SOUND); }
                     if (!string.IsNullOrWhiteSpace(r.UID) && r.UID.Contains("ENCODING=QUOTED-PRINTABLE")) { r.UID = DecodeQuotedPrintable(r.UID); }
                     if (!string.IsNullOrWhiteSpace(r.CLIENTPIDMAP) && r.CLIENTPIDMAP.Contains("ENCODING=QUOTED-PRINTABLE")) { r.CLIENTPIDMAP = DecodeQuotedPrintable(r.CLIENTPIDMAP); }
-                    if (!string.IsNullOrWhiteSpace(r.URL) && r.URL.Contains("ENCODING=QUOTED-PRINTABLE")) { r.URL = DecodeQuotedPrintable(r.URL); }
-                    if (!string.IsNullOrWhiteSpace(r.VERSION) && r.VERSION.Contains("ENCODING=QUOTED-PRINTABLE")) { r.VERSION = DecodeQuotedPrintable(r.VERSION); }
+                    if (!string.IsNullOrWhiteSpace(r.URL) && r.URL.Contains("ENCODING=QUOTED-PRINTABLE")) { r.URL = DecodeQuotedPrintable(r.URL); }                    
                     if (!string.IsNullOrWhiteSpace(r.KEY) && r.KEY.Contains("ENCODING=QUOTED-PRINTABLE")) { r.KEY = DecodeQuotedPrintable(r.KEY); }
                     if (!string.IsNullOrWhiteSpace(r.FBURL) && r.FBURL.Contains("ENCODING=QUOTED-PRINTABLE")) { r.FBURL = DecodeQuotedPrintable(r.FBURL); }
                     if (!string.IsNullOrWhiteSpace(r.CALADRURI) && r.CALADRURI.Contains("ENCODING=QUOTED-PRINTABLE")) { r.CALADRURI = DecodeQuotedPrintable(r.CALADRURI); }
@@ -471,8 +469,7 @@ namespace VCardFileCleaner
                 if (!string.IsNullOrWhiteSpace(record.SOUND)) { lines.Add("SOUND:" + record.SOUND.Trim()); }
                 if (!string.IsNullOrWhiteSpace(record.UID)) { lines.Add("UID:" + record.UID.Trim()); }
                 if (!string.IsNullOrWhiteSpace(record.CLIENTPIDMAP)) { lines.Add("CLIENTPIDMAP:" + record.CLIENTPIDMAP.Trim()); }
-                if (!string.IsNullOrWhiteSpace(record.URL)) { lines.Add("URL:" + record.URL.Trim()); }
-                if (!string.IsNullOrWhiteSpace(record.VERSION)) { lines.Add("VERSION:" + record.VERSION.Trim()); }
+                if (!string.IsNullOrWhiteSpace(record.URL)) { lines.Add("URL:" + record.URL.Trim()); }                
                 if (!string.IsNullOrWhiteSpace(record.KEY)) { lines.Add("KEY:" + record.KEY.Trim()); }
                 if (!string.IsNullOrWhiteSpace(record.FBURL)) { lines.Add("FBURL:" + record.FBURL.Trim()); }
                 if (!string.IsNullOrWhiteSpace(record.CALADRURI)) { lines.Add("CALADRURI:" + record.CALADRURI.Trim()); }
